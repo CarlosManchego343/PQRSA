@@ -3,7 +3,9 @@ import 'package:pqrsafinal/Vweb/PQRS/vistasPQRS/agregarPQRS.dart';
 import 'package:pqrsafinal/Vweb/PQRS/vistasPQRS/editarPQRSA.dart';
 import 'package:pqrsafinal/Vweb/PQRS/vistasPQRS/verADetallePQRSA.dart';
 import 'package:pqrsafinal/Vweb/principal.dart';
+import 'package:pqrsafinal/firebase_options.dart';
 import 'package:pqrsafinal/widgets/scrollViewWeb.dart';
+import 'package:firebase_core/firebase_core.dart';
 import 'package:flutter/material.dart';
 
 // screens
@@ -14,8 +16,17 @@ import 'package:pqrsafinal/screens/articles.dart';
 
 import 'Vweb/login.dart';
 
+Future main() async {
 
-void main() => runApp(MyApp());
+  WidgetsFlutterBinding.ensureInitialized();
+
+  await Firebase.initializeApp(
+    options: DefaultFirebaseOptions.currentPlatform,
+  );
+
+  runApp(MyApp());
+
+  }
 
 class MyApp extends StatelessWidget {
   @override
