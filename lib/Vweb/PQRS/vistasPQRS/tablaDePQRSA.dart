@@ -1,5 +1,8 @@
+// ignore_for_file: unnecessary_new, prefer_const_constructors
+
 import 'package:pqrsafinal/constants/Theme.dart';
 import 'package:flutter/material.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/material.dart';
 
@@ -9,62 +12,74 @@ class tablaDePQRSA extends StatefulWidget {
 }
 
 class tablaDePQRSAState extends State<tablaDePQRSA> {
-  void irADetalle() {
+  void _irADetalle() {
     Navigator.pushNamed(context, '/verADetallePQRSA');
   }
 
-  void irAEditar() {
+  void _irAEditar() {
     Navigator.pushNamed(context, '/editarPQRSA');
+  }
+
+  List<DataRow> _crearFilas(QuerySnapshot snapshot) {
+    List<DataRow> newList =
+        snapshot.docs.map((DocumentSnapshot documentSnapshot) {
+      return new DataRow(cells: [
+        DataCell(Text(documentSnapshot.get('Fecha_de_radicacion'))),
+        DataCell(Text(documentSnapshot.get('Tipo_de_pqrsa'))),
+        DataCell(Text(documentSnapshot.get('Area'))),
+        DataCell(Text(documentSnapshot.get('Bloque'))),
+        DataCell(Text(documentSnapshot.get('Dirijido_a'))),
+        DataCell(Text(documentSnapshot.get('Documento_del_cliente'))),
+        DataCell(Text(documentSnapshot.get('Documento_del_recibidor'))),
+        DataCell(FlatButton(
+          onPressed: _irADetalle,
+          child: Text(
+            "entrar",
+            style: TextStyle(color: ArgonColors.black),
+          ),
+          color: ArgonColors.bgTituloLogin,
+        )),
+        DataCell(FlatButton(
+          onPressed: _irAEditar,
+          child: Text(
+            "Editar",
+            style: TextStyle(color: ArgonColors.black),
+          ),
+          color: ArgonColors.bgTituloLogin,
+        ))
+      ]);
+    }).toList();
+
+    return newList;
   }
 
   @override
   Widget build(BuildContext context) {
     return Expanded(
-        child: SingleChildScrollView(
-      scrollDirection: Axis.horizontal,
-      child: DataTable(
-        
-          headingRowColor:
-              MaterialStateProperty.all(ArgonColors.columnaTitulos),
-          columns: [
-            DataColumn(label: Text('Asunto')),
-            DataColumn(label: Text('Dirijida a')),
-            DataColumn(label: Text('Tipo de PQRSA')),
-            DataColumn(label: Text('Fecha de radicación')),
-            DataColumn(label: Text('Bloque')),
-            DataColumn(label: Text('Documento de quien radica la PQRSA')),
-            DataColumn(label: Text('Documento de quien recibio la PQRSA')),
-            DataColumn(label: Text('Ver a detalle')),
-            DataColumn(label: Text('Editar PQRSA'))
-          ],
-          rows: [
-            DataRow(cells: [
-              DataCell(Text(
-                  "Respuesta proyectos de inversión social vigencias 2018, 2019 y 2020")),
-              DataCell(Text("Trevor Belmont")),
-              DataCell(Text("Petición")),
-              DataCell(Text("16/09/2020")),
-              DataCell(Text("Vallemedio")),
-              DataCell(Text("1007565696")),
-              DataCell(Text("1007656588")),
-              DataCell(FlatButton(
-                onPressed: irADetalle,
-                child: Text(
-                  "entrar",
-                  style: TextStyle(color: ArgonColors.black),
-                ),
-                color: ArgonColors.bgTituloLogin,
-              )),
-              DataCell(FlatButton(
-                onPressed: irAEditar,
-                child: Text(
-                  "Editar",
-                  style: TextStyle(color: ArgonColors.black),
-                ),
-                color: ArgonColors.bgTituloLogin,
-              ))
-            ])
-          ]),
-    ));
+      child: SingleChildScrollView(
+          scrollDirection: Axis.horizontal,
+          child: StreamBuilder(
+              stream:
+                  FirebaseFirestore.instance.collection('PQRSA').snapshots(),
+              builder: (context, snapshots) {
+                if (!snapshots.hasData) return Text('Cargando...');
+                return new DataTable(
+                  headingRowColor:
+                      MaterialStateProperty.all(ArgonColors.columnaTitulos),
+                  columns: <DataColumn>[
+                    new DataColumn(label: Text('Fecha de radicación')),
+                    new DataColumn(label: Text('Tipo de pqrsa')),
+                    new DataColumn(label: Text('Area')),
+                    new DataColumn(label: Text('Bloque')),
+                    new DataColumn(label: Text('Dirijido a')),
+                    new DataColumn(label: Text('Documento del cliente')),
+                    new DataColumn(label: Text('Documento del recibidor')),
+                    new DataColumn(label: Text('Ver a detalle')),
+                    new DataColumn(label: Text('Editar')),
+                  ],
+                  rows: _crearFilas(snapshots.data as QuerySnapshot<Object?>),
+                );
+              })),
+    );
   }
 }

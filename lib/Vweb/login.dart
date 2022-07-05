@@ -5,6 +5,7 @@ import 'package:pqrsafinal/constants/Theme.dart';
 
 //widgets
 import 'package:pqrsafinal/widgets/input.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
 import 'package:flutter/services.dart';
 
@@ -16,6 +17,7 @@ class LoginWeb extends StatefulWidget {
 }
 
 class _LoginWebState extends State<LoginWeb> {
+  final FirebaseFirestore db = FirebaseFirestore.instance;
   final double height = window.physicalSize.height;
   final _formKey = GlobalKey<FormState>();
 
@@ -42,6 +44,7 @@ class _LoginWebState extends State<LoginWeb> {
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("El email digitado no es valido")));
+
       }
     }
   }
