@@ -14,7 +14,7 @@ import 'package:pqrsafinal/screens/pro.dart';
 import 'package:pqrsafinal/screens/profile.dart';
 import 'package:pqrsafinal/screens/articles.dart';
 
-import 'Vweb/login.dart';
+import 'Vweb/loginWeb.dart';
 
 Future main() async {
 
@@ -35,7 +35,7 @@ class MyApp extends StatelessWidget {
         scrollBehavior: MyCustomScrollBehavior(),
         title: 'Argon PRO Flutter',
         theme: ThemeData(fontFamily: 'OpenSans'),
-        initialRoute: "/principalWeb",
+        initialRoute: "/loginWeb",
         debugShowCheckedModeBanner: false,
         routes: <String, WidgetBuilder>{
           "/onboarding": (BuildContext context) => new Onboarding(),

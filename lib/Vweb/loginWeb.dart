@@ -1,3 +1,5 @@
+// ignore_for_file: prefer_const_constructors, avoid_print
+
 import 'dart:ui';
 import 'package:flutter/material.dart';
 
@@ -5,7 +7,7 @@ import 'package:pqrsafinal/constants/Theme.dart';
 
 //widgets
 import 'package:pqrsafinal/widgets/input.dart';
-import 'package:cloud_firestore/cloud_firestore.dart';
+import 'package:firebase_auth/firebase_auth.dart';
 
 import 'package:flutter/services.dart';
 
@@ -17,7 +19,7 @@ class LoginWeb extends StatefulWidget {
 }
 
 class _LoginWebState extends State<LoginWeb> {
-  final FirebaseFirestore db = FirebaseFirestore.instance;
+  final FirebaseAuth _autenticacion = FirebaseAuth.instance;
   final double height = window.physicalSize.height;
   final _formKey = GlobalKey<FormState>();
 
@@ -31,20 +33,37 @@ class _LoginWebState extends State<LoginWeb> {
     _contrasenia = TextEditingController(text: "");
   }
 
+  // ignore: non_constant_identifier_names
   void ClearTextEditingController() {
     _email!.text = "";
     _contrasenia!.text = "";
   }
 
-  void entrar() {
+  void _entrar() {
+    ClearTextEditingController();
+    Navigator.pushNamed(context, '/principalWeb');
+  }
+
+  Future<void> _entrarConEmailYContrasenia() async {
     if (_formKey.currentState!.validate()) {
       if (isEmail(_email!.text)) {
-        Navigator.pushNamed(context, '/principalWeb');
-        ClearTextEditingController();
+        try {
+          UserCredential credenciales =
+              await _autenticacion.signInWithEmailAndPassword(
+                  email: _email!.text, password: _contrasenia!.text);
+          _entrar();
+        } on FirebaseAuthException catch (e) {
+          if (e.code == 'user-not-found') {
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Este usuario no existe")));
+          } else if (e.code == 'wrong-password') {
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("La contraseña es incorrecta")));
+          }
+        }
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
             SnackBar(content: Text("El email digitado no es valido")));
-
       }
     }
   }
@@ -52,7 +71,7 @@ class _LoginWebState extends State<LoginWeb> {
   static bool isEmail(String em) {
     String p =
         r'^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$';
-    RegExp regExp = new RegExp(p);
+    RegExp regExp = RegExp(p);
     return regExp.hasMatch(em);
   }
 
@@ -69,6 +88,7 @@ class _LoginWebState extends State<LoginWeb> {
                     fit: BoxFit.cover)),
           ),
           Align(
+            // ignore: unnecessary_new
             child: new Form(
               key: _formKey,
               autovalidateMode: AutovalidateMode.disabled,
@@ -100,6 +120,7 @@ class _LoginWebState extends State<LoginWeb> {
                                   child: Column(
                                     mainAxisAlignment:
                                         MainAxisAlignment.spaceAround,
+                                    // ignore: prefer_const_literals_to_create_immutables
                                     children: [
                                       Center(
                                           child: Padding(
@@ -190,7 +211,8 @@ class _LoginWebState extends State<LoginWeb> {
                                               child: FlatButton(
                                                 textColor: ArgonColors.black,
                                                 color: ArgonColors.success,
-                                                onPressed: entrar,
+                                                onPressed:
+                                                    _entrarConEmailYContrasenia,
                                                 shape: RoundedRectangleBorder(
                                                   borderRadius:
                                                       BorderRadius.circular(
@@ -204,8 +226,8 @@ class _LoginWebState extends State<LoginWeb> {
                                                         bottom: 12),
                                                     child: Text("ACCEDER",
                                                         style: TextStyle(
-                                                            color:
-                                                                ArgonColors.secondary,
+                                                            color: ArgonColors
+                                                                .secondary,
                                                             fontWeight:
                                                                 FontWeight.w600,
                                                             fontSize: 16.0))),
