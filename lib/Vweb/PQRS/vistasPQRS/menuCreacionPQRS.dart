@@ -1,5 +1,5 @@
 import 'package:pqrsafinal/Vweb/PQRS/vistasPQRS/agregarClientePQRS.dart';
-import 'package:pqrsafinal/Vweb/PQRS/vistasPQRS/agregarPQRS.dart';
+import 'package:pqrsafinal/Vweb/PQRS/vistasPQRS/agregarPQRSA.dart';
 import 'package:pqrsafinal/constants/Theme.dart';
 import 'package:flutter/material.dart';
 
@@ -10,7 +10,7 @@ class menuCreacionPQRS extends StatefulWidget {
 
 class menuCreacionPQRSState extends State<menuCreacionPQRS> {
   int _selectIndex = 0;
-  List<Widget> _widgetsOptions = [agregarClientePQRS(), agregarPQRS()];
+  List<Widget> _widgetsOptions = [agregarClientePQRS(), agregarPQRSA()];
 
   void _itemTapped(int index) {
     setState(() {

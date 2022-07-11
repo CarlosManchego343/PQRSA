@@ -35,7 +35,8 @@ class agregarPQRSClienteState extends State<agregarClientePQRS> {
     _direccion = TextEditingController(text: "");
   }
 
-  _clearfields() {
+  _limpiarCampos() {
+    _municipioSeleccionado = "Municipio de residencia";
     _nombreCliente!.text = "";
     _documentoCliente!.text = "";
     _telefono!.text = "";
@@ -43,22 +44,23 @@ class agregarPQRSClienteState extends State<agregarClientePQRS> {
     _direccion!.text = "";
   }
 
-  void _guardar() {
+  void _AgregarCliente() {
     if (_formKey.currentState!.validate()) {
-      if(_municipioSeleccionado != 'Municipio de residencia') {
+      if (_municipioSeleccionado != 'Municipio de residencia') {
         db.collection('Cliente').doc(_documentoCliente!.text).set({
-        "Correo_electronico": _correo!.text,
-        "Direccion": _direccion!.text,
-        "Municipio_de_residencia": _municipioSeleccionado,
-        "Nombre": _nombreCliente!.text,
-        "Numero_de_documento": _documentoCliente!.text,
-        "Telefono": _telefono!.text
-      });
-      ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Información registrada correctamente")));
+          "Correo_electronico": _correo!.text,
+          "Direccion": _direccion!.text,
+          "Municipio_de_residencia": _municipioSeleccionado,
+          "Nombre": _nombreCliente!.text,
+          "Numero_de_documento": _documentoCliente!.text,
+          "Telefono": _telefono!.text
+        });
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Información registrada correctamente")));
+        _limpiarCampos();
       } else {
         ScaffoldMessenger.of(context).showSnackBar(
-          SnackBar(content: Text("Por favor, elija un municipio")));
+            SnackBar(content: Text("Por favor, elija un municipio")));
       }
     }
   }
@@ -249,7 +251,7 @@ class agregarPQRSClienteState extends State<agregarClientePQRS> {
                 ),
                 SizedBox(height: 15),
                 FlatButton(
-                  onPressed: _guardar,
+                  onPressed: _AgregarCliente,
                   child: Text(
                     "Registrar",
                     style: TextStyle(color: ArgonColors.black),

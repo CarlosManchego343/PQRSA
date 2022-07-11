@@ -1,29 +1,58 @@
+// ignore_for_file: prefer_const_constructors
+
 import 'package:pqrsafinal/constants/Theme.dart';
 import 'package:pqrsafinal/widgets/input.dart';
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
+import 'package:cloud_firestore/cloud_firestore.dart';
 
-class agregarPQRS extends StatefulWidget {
+class agregarPQRSA extends StatefulWidget {
   @override
-  agregarPQRSState createState() => agregarPQRSState();
+  agregarPQRSAtate createState() => agregarPQRSAtate();
 }
 
-class agregarPQRSState extends State<agregarPQRS> {
+class agregarPQRSAtate extends State<agregarPQRSA> {
   final _formKey = GlobalKey<FormState>();
+  final FirebaseFirestore db = FirebaseFirestore.instance;
 
-  String _tipoSelected = 'Tipo de PQRSA';
-  String _bloqueSelected = 'Vallemedio';
+  String _tipoSeleccionado = 'Tipo de PQRSA';
+  String _bloqueSeleccionado = 'Bloque';
+  String _areaSeleccionada = 'Area';
 
-  List _tipo = ['Tipo de PQRSA','Petición', 'Queja', 'Reclamo', 'Sugerencia', 'Agradecimiento'];
+  // ignore: prefer_final_fields
+  List _tipo = [
+    'Tipo de PQRSA',
+    'Petición',
+    'Queja',
+    'Reclamo',
+    'Sugerencia',
+    'Agradecimiento'
+  ];
 
-  List _bloque = ['Bloque','Vallemedio', 'Carbonera'];
+  // ignore: prefer_final_fields
+  List _bloque = ['Bloque', 'Vallemedio', 'Carbonera'];
+
+  // ignore: prefer_final_fields
+  List _area = [
+    'Area',
+    'Legal',
+    'Finanzas',
+    'Producción',
+    'GTH',
+    'Tierras',
+    'Seguridad',
+    'HSE',
+    'Civil',
+    'Driling',
+    'Social'
+  ];
 
   TextEditingController? _numeroRadicacion;
   TextEditingController? _dirjidaA;
   TextEditingController? _asunto;
   TextEditingController? _fechaRadicacion;
   TextEditingController? _documentoDelRecibidor;
-  TextEditingController? _documentoDelRadicado;
+  TextEditingController? _documentoDelCliente;
 
   @override
   void initState() {
@@ -33,10 +62,53 @@ class agregarPQRSState extends State<agregarPQRS> {
     _asunto = TextEditingController(text: "");
     _fechaRadicacion = TextEditingController(text: "");
     _documentoDelRecibidor = TextEditingController(text: "");
-    _documentoDelRadicado = TextEditingController(text: "");
+    _documentoDelCliente = TextEditingController(text: "");
   }
 
-  void AlmacenarPQRSA() {}
+  void _limpiarCampos() {
+    _tipoSeleccionado = "Tipo de PQRSA";
+    _bloqueSeleccionado = "Bloque";
+    _areaSeleccionada = "Area";
+    _numeroRadicacion!.text = "";
+    _dirjidaA!.text = "";
+    _asunto!.text = "";
+    _fechaRadicacion!.text = "";
+    _documentoDelRecibidor!.text = "";
+    _documentoDelCliente!.text = "";
+  }
+
+  void _agregarPQRSA() {
+    if (_formKey.currentState!.validate()) {
+      if (_tipoSeleccionado != 'Tipo de PQRSA') {
+        if (_bloqueSeleccionado != 'Bloque') {
+          if (_areaSeleccionada != 'Area') {
+            db.collection('PQRSA').doc(_numeroRadicacion!.text).set({
+              "Area": _areaSeleccionada,
+              "Bloque": _bloqueSeleccionado,
+              "Dirijido_a": _dirjidaA!.text,
+              "Documento_del_cliente": _documentoDelCliente!.text,
+              "Documento_del_recibidor": _documentoDelRecibidor!.text,
+              "Fecha_de_radicacion": _fechaRadicacion!.text,
+              "Numero_de_radicacion": _numeroRadicacion!.text,
+              "Tipo_de_pqrsa": _tipoSeleccionado
+            });
+            ScaffoldMessenger.of(context).showSnackBar(SnackBar(
+                content: Text("Información registrada correctamente")));
+            _limpiarCampos();
+          } else {
+            ScaffoldMessenger.of(context).showSnackBar(
+                SnackBar(content: Text("Por favor, elija una area")));
+          }
+        } else {
+          ScaffoldMessenger.of(context).showSnackBar(
+              SnackBar(content: Text("Por favor, elija un bloque")));
+        }
+      } else {
+        ScaffoldMessenger.of(context).showSnackBar(
+            SnackBar(content: Text("Por favor, elija un tipo de PQRSA")));
+      }
+    }
+  }
 
   @override
   Widget build(BuildContext context) {
@@ -111,7 +183,7 @@ class agregarPQRSState extends State<agregarPQRS> {
                                     ),
                                   ),
                                 ),
-                                value: _tipoSelected,
+                                value: _tipoSeleccionado,
                                 icon: const Icon(Icons.arrow_drop_down_sharp),
                                 iconSize: 28,
                                 elevation: 16,
@@ -119,7 +191,7 @@ class agregarPQRSState extends State<agregarPQRS> {
                                 onChanged: (String? newValue) {
                                   if (newValue != null) {
                                     setState(() {
-                                      _tipoSelected = newValue;
+                                      _tipoSeleccionado = newValue;
                                     });
                                   }
                                 },
@@ -141,56 +213,57 @@ class agregarPQRSState extends State<agregarPQRS> {
                                 right: 20.0,
                                 bottom: 10.0),
                             child: Container(
-                            child: DropdownButtonFormField<String>(
-                              hint: Text('Bloque'),
-                              decoration: InputDecoration(
-                                filled: true,
-                                errorMaxLines: 2,
-                                labelStyle: TextStyle(color: ArgonColors.black),
-                                contentPadding: const EdgeInsets.only(
-                                    top: 16.0, left: 10.0),
-                                border: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context)
-                                        .focusColor
-                                        .withOpacity(0.2),
+                              child: DropdownButtonFormField<String>(
+                                hint: Text('Bloque'),
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  errorMaxLines: 2,
+                                  labelStyle:
+                                      TextStyle(color: ArgonColors.black),
+                                  contentPadding: const EdgeInsets.only(
+                                      top: 16.0, left: 10.0),
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context)
+                                          .focusColor
+                                          .withOpacity(0.2),
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context)
+                                          .focusColor
+                                          .withOpacity(0.5),
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: ArgonColors.bgTituloLogin,
+                                    ),
                                   ),
                                 ),
-                                focusedBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: Theme.of(context)
-                                        .focusColor
-                                        .withOpacity(0.5),
-                                  ),
-                                ),
-                                enabledBorder: OutlineInputBorder(
-                                  borderSide: BorderSide(
-                                    color: ArgonColors.bgTituloLogin,
-                                  ),
-                                ),
+                                value: _bloqueSeleccionado,
+                                icon: const Icon(Icons.arrow_drop_down_sharp),
+                                iconSize: 28,
+                                elevation: 16,
+                                style: Theme.of(context).textTheme.bodyText1,
+                                onChanged: (String? newValue) {
+                                  if (newValue != null) {
+                                    setState(() {
+                                      _bloqueSeleccionado = newValue;
+                                    });
+                                  }
+                                },
+                                items: _bloque
+                                    .map<DropdownMenuItem<String>>((value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
                               ),
-                              value: _bloqueSelected,
-                              icon: const Icon(Icons.arrow_drop_down_sharp),
-                              iconSize: 28,
-                              elevation: 16,
-                              style: Theme.of(context).textTheme.bodyText1,
-                              onChanged: (String? newValue) {
-                                if (newValue != null) {
-                                  setState(() {
-                                    _bloqueSelected = newValue;
-                                  });
-                                }
-                              },
-                              items: _bloque
-                                  .map<DropdownMenuItem<String>>((value) {
-                                return DropdownMenuItem<String>(
-                                  value: value,
-                                  child: Text(value),
-                                );
-                              }).toList(),
                             ),
                           ),
-                            ),
                           SizedBox(height: 15),
                           Padding(
                             padding: const EdgeInsets.only(
@@ -209,6 +282,65 @@ class agregarPQRSState extends State<agregarPQRS> {
                                   return 'Por favor introduzca el asunto de la PQRSA';
                                 }
                               },
+                            ),
+                          ),
+                          SizedBox(height: 15),
+                          Padding(
+                            padding: const EdgeInsets.only(
+                                top: 10.0,
+                                left: 20.0,
+                                right: 20.0,
+                                bottom: 10.0),
+                            child: Container(
+                              child: DropdownButtonFormField<String>(
+                                hint: Text('Area'),
+                                decoration: InputDecoration(
+                                  filled: true,
+                                  errorMaxLines: 2,
+                                  labelStyle:
+                                      TextStyle(color: ArgonColors.black),
+                                  contentPadding: const EdgeInsets.only(
+                                      top: 16.0, left: 10.0),
+                                  border: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context)
+                                          .focusColor
+                                          .withOpacity(0.2),
+                                    ),
+                                  ),
+                                  focusedBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: Theme.of(context)
+                                          .focusColor
+                                          .withOpacity(0.5),
+                                    ),
+                                  ),
+                                  enabledBorder: OutlineInputBorder(
+                                    borderSide: BorderSide(
+                                      color: ArgonColors.bgTituloLogin,
+                                    ),
+                                  ),
+                                ),
+                                value: _areaSeleccionada,
+                                icon: const Icon(Icons.arrow_drop_down_sharp),
+                                iconSize: 28,
+                                elevation: 16,
+                                style: Theme.of(context).textTheme.bodyText1,
+                                onChanged: (String? newValue) {
+                                  if (newValue != null) {
+                                    setState(() {
+                                      _areaSeleccionada = newValue;
+                                    });
+                                  }
+                                },
+                                items: _area
+                                    .map<DropdownMenuItem<String>>((value) {
+                                  return DropdownMenuItem<String>(
+                                    value: value,
+                                    child: Text(value),
+                                  );
+                                }).toList(),
+                              ),
                             ),
                           ),
                         ],
@@ -268,7 +400,7 @@ class agregarPQRSState extends State<agregarPQRS> {
                               inputFormatter:
                                   FilteringTextInputFormatter.deny(""),
                               prefixIcon: Icon(Icons.pin),
-                              controller: _documentoDelRadicado,
+                              controller: _documentoDelCliente,
                               validator: (documentoC) {
                                 if (documentoC.isEmpty) {
                                   return 'Por favor introduzca el número de documento del radicado';
@@ -302,9 +434,7 @@ class agregarPQRSState extends State<agregarPQRS> {
                 SizedBox(height: 15),
                 FlatButton(
                   onPressed: () {
-                    if (_formKey.currentState!.validate()) {
-                      AlmacenarPQRSA();
-                    }
+                    _agregarPQRSA();
                   },
                   child: Text(
                     "Registrar",
